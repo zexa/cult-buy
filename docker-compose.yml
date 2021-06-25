@@ -1,0 +1,13 @@
+service:
+  redis:
+    image: redis:alpine3.13
+    ports:
+      - 6379:6379
+  postgresql:
+    image: postgres:9.6.22
+    ports:
+      - 3306:3306
+    environment_file: .env
+    volumes:
+      - ./mount/postgresql:/var/lib/postgresql/data
+
