@@ -60,17 +60,28 @@ CartItem {
 
 Money {} // from a lib
 
+enum ImageAssignables {
+  Listing,
+  User,
+}
+
 Image {
   hash,
   file: File,
   created_at: DateTime,
   modified_at: DateTime,
+  assigned_to: ImageAssignables, // Listing, 
+  assigned_at: DateTime,
 }
 
 File {
+  id,
+  hash,
   source, // AWS S3, FTP,
   link,
   created_at: DateTime,
+  assigned_to: String, // Image,
+  assigned_at: DateTime,
 }
 
 ShippingAddress {

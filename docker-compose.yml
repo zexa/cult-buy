@@ -9,4 +9,7 @@ services:
       - 13306:3306
     volumes:
       - ./mount/postgresql:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
 
