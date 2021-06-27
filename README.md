@@ -1,7 +1,26 @@
 # cult-buy
+Cult.buy is a Drop.com alternative. For profit, but part of the proceeds go to open source communities.
+
+## 2021-06-27
+Goals:
+* Logging
+* Image validation
+* Image Struct
+* Maybe database?
+
+Achieved:
+* Logging
+* Image validation
+* Image Struct
+* (Partial) User Struct
+
+What's left:
+* image_validor should check that Content-Type correlates with image
+* Files/Images are still pending a database
+* Files should be moved into a proper directory.
 
 ## Schema
-
+```
 Users {
   id, // backendonly
   hash,
@@ -101,4 +120,5 @@ Delivery {
   history, // Shipping to ShippingAddress, DeliveryAtCountryOfOrigin, DeliveryAtCountryDestination
   status: DeliveryStatus, // NotYetShipped,DeliveryAtCountryOfOrigin, ...
 }
+```
 
