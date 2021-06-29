@@ -1,6 +1,22 @@
 # cult-buy
 Cult.buy is a Drop.com alternative. For profit, but part of the proceeds go to open source communities.
 
+## 2021-06-29
+Goals:
+* Files/Images are still pending a database
+* Files should be moved into a proper directory.
+* Sqlx and initial structures
+
+Achieved:
+* Files should be moved into a proper directory.
+* Added sqlx and started reading about the dock
+
+What's left:
+* Build custom docker image with sqlx-cli and other alpine dependencies.
+* Start refactoring codebase into modules. It's starting to become a mess.
+* Reinstate TempDir struct, because move_file works like a charm.
+* Store File and Image metadata inside database
+
 ## 2021-06-27
 Goals:
 * Logging

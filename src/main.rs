@@ -1,12 +1,9 @@
 extern crate dotenv;
 
 use dotenv::dotenv;
-use std::env;
 use tide::prelude::*;
 use tide::Request;
 use std::sync::Arc;
-use tempfile::TempDir;
-use std::path::Path;
 use async_std::fs::OpenOptions;
 use async_std::io;
 use std::future::Future;
@@ -15,15 +12,16 @@ use tide::Next;
 use tide::StatusCode;
 use tide::Response;
 use tide::log;
-use std::path::PathBuf;
 use uuid::Uuid;
 use chrono::DateTime;
 use chrono::Utc;
+use std::path::PathBuf;
+use fs_extra::file::move_file;
+use fs_extra::file::CopyOptions;
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     dotenv().ok();
-    println!("{}", env::var("POSTGRES_USER").unwrap().as_str());
 
     let mut app = tide::with_state(ApplicationState::try_new()?);
     log::start();
@@ -60,19 +58,27 @@ async fn post_listings(mut req: Request<ApplicationState>) -> tide::Result {
 
 #[derive(Clone, Debug)]
 struct ApplicationState {
-    tempdir: Arc<TempDir>,
+    tempdir: Arc<PathBuf>,
+    permdir: Arc<PathBuf>,
 }
 
 
 impl ApplicationState {
     fn try_new() -> Result<Self, std::io::Error> {
         Ok(Self {
-            tempdir: Arc::new(tempfile::tempdir()?),
+            tempdir: Arc::new(PathBuf::from("/cult-buy/temp/")),
+            // TODO: FIX THIS REEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+            permdir: Arc::new(PathBuf::from("/cult-buy/files/")),
         })
     }
 
-    fn path(&self) -> &Path {
-        self.tempdir.path()
+    // TODO: Rename to tempdir()
+    fn tempdir(&self) -> &PathBuf {
+        &self.tempdir
+    }
+
+    fn permdir(&self) -> &PathBuf {
+        &self.permdir
     }
 }
 
@@ -126,6 +132,7 @@ struct File {
     size: u64,
     content_type: String,
     created_at: DateTime<Utc>,
+    // TODO: Add url here maybe?
 }
 
 impl File {
@@ -153,7 +160,17 @@ impl File {
     }
 
     pub fn size(&self) -> u64 {
-        self.size
+        self.size 
+    }
+
+    // /home/zexa/Projects/cult-buy/files/a1c69e0d-a6d7-4594-acf3-188ac29e5c16
+    pub fn take_ownership(&mut self, folder: &PathBuf) -> Result<(), std::io::Error> {
+        let path = folder.join(self.hash.to_string());
+
+        move_file(self.path(), &path, &CopyOptions::new());
+        self.path = path;
+
+        Ok(())
     }
 }
 
@@ -163,7 +180,7 @@ fn file_uploader<'a>(
 ) -> Pin<Box<dyn Future<Output = tide::Result> + Send + 'a>> {
     Box::pin(async {
         let path = request.param("file_name")?;
-        let fs_path = request.state().path().join(path.clone());
+        let fs_path = request.state().tempdir().join(path.clone());
 
         let file = OpenOptions::new()
             .create(true)
@@ -196,7 +213,9 @@ struct Image {
 }
 
 impl Image {
-    pub fn new(file: File) -> Self {
+    pub fn new(mut file: File, folder: &PathBuf) -> Self {
+        file.take_ownership(folder).unwrap();
+
         Self {
             hash: Uuid::new_v4(),
             file,
@@ -214,12 +233,17 @@ impl Image {
 }
 
 async fn post_images(req: Request<ApplicationState>) -> tide::Result {
-    let image = Image::new(req.ext::<File>().unwrap().clone());
+    let image = Image::new(
+        req.ext::<File>().unwrap().clone(),
+        req.state().permdir()
+    );
 
     log::info!("Image uploaded: {:?}", image);
 
     Ok("".into())
 }
+
+
 
 struct User {
     hash: Uuid,

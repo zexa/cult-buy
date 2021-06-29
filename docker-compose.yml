@@ -1,4 +1,17 @@
 services:
+  rust:
+    image: rust:alpine3.13
+    ports:
+      - 8080:8080
+    working_dir: '/cult-buy'
+    volumes:
+      - ./Cargo.lock:/cult-buy/Cargo.lock
+      - ./Cargo.toml:/cult-buy/Cargo.toml
+      - ./src:/cult-buy/src
+      - ./target:/cult-buy/target
+      - ./files:/cult-buy/files
+      - ~/.cargo/registry:/root/.cargo/registry
+    command: sh -c "tail -F /der/null"
   redis:
     image: redis:alpine3.13
     ports:
