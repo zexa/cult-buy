@@ -12,10 +12,15 @@ Achieved:
 * Added sqlx and started reading about the dock
 
 What's left:
-* Build custom docker image with sqlx-cli and other alpine dependencies.
+* Build custom docker image for development
+  * Add sqlx-cli
+  * Set working_dir
+  * Set command (idle)
 * Start refactoring codebase into modules. It's starting to become a mess.
 * Reinstate TempDir struct, because move_file works like a charm.
 * Store File and Image metadata inside database
+* Make files path configurable
+* docker-compose.yml source files should be read only
 
 ## 2021-06-27
 Goals:
